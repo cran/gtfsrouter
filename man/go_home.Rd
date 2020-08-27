@@ -36,7 +36,7 @@ each session, in which case the variables may be set with:
 \code{Sys.setenv ("gtfs_work" = "<my work station>")}
 \code{Sys.setenv ("gtfs_data" = "/full/path/to/gtfs.zip")}
 Alternatively, to set these automatically for each session, paste those lines
-into the file \code{~/.Renviron} - that is, a file named ".Renviron" in the user's
+into the file \verb{~/.Renviron} - that is, a file named ".Renviron" in the user's
 home directory.
 
 The \link{process_gtfs_local} function reduces the GTFS data set to the
@@ -44,7 +44,7 @@ minimal possible size necessary for local routing.  GTFS data are
 nevertheless typically quite large, and both the \link{go_home} and
 \link{go_to_work} functions may take some time to execute. Most of this time
 is devoted to loading the data in to the current workspace and as such is
-largley unavoidable.
+largely unavoidable.
 }
 \examples{
 \dontrun{

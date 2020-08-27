@@ -31,7 +31,7 @@
 #' nevertheless typically quite large, and both the \link{go_home} and
 #' \link{go_to_work} functions may take some time to execute. Most of this time
 #' is devoted to loading the data in to the current workspace and as such is
-#' largley unavoidable.
+#' largely unavoidable.
 #'
 #' @return A `data.frame` specifying the next available route from work to home.
 #' @examples
@@ -64,11 +64,11 @@ go_home <- function (wait = 0, start_time)
 #' go_to_work
 #'
 #' Use local environmental variables specifying home and work stations and
-#' locations of locally-stored GTFS data to route from home to work locationn
+#' locations of locally-stored GTFS data to route from home to work location
 #' with next available service.
 #'
-#' @inherit go_home return params 
-#' @inherit go_home return details 
+#' @inherit go_home return params
+#' @inherit go_home return details
 #'
 #' @return A `data.frame` specifying the next available route from work to home.
 #' @examples
@@ -118,7 +118,7 @@ go_home_work <- function (home = TRUE, wait, start_time)
         to <- vars$work
     }
     if (missing (start_time))
-        start_time = NULL # nocov
+        start_time <- NULL # nocov
     res <- gtfs_route (gtfs, from = from, to = to, start_time = start_time)
     if (wait > 0)
     {
@@ -141,7 +141,8 @@ get_envvars <- function ()
 
     f <- (Sys.getenv ("gtfs_data"))
     if (!file.exists (f))
-        stop ("File ", f, " specified by environmental variable 'gtfs_data' does not exist")
+        stop ("File ", f, " specified by environmental variable ",
+              "'gtfs_data' does not exist")
 
     list (home = Sys.getenv ("gtfs_home"),
           work = Sys.getenv ("gtfs_work"),
@@ -169,7 +170,7 @@ process_gtfs_local <- function (expand = 2)
 {
     vars <- get_envvars ()
 
-    gtfs <- extract_gtfs (vars$file)
+    gtfs <- extract_gtfs (vars$file, quiet = TRUE)
     gtfs$agency <- NULL
     gtfs$calendar_dates <- NULL
     gtfs$shapes <- NULL
@@ -178,8 +179,10 @@ process_gtfs_local <- function (expand = 2)
 
     gtfs$routes <- gtfs$routes [, c ("route_id", "route_short_name")]
     gtfs$stops <- gtfs$stops [, c ("stop_id", "stop_name")]
-    gtfs$transfers <- gtfs$transfers [, c ("from_stop_id", "to_stop_id", "min_transfer_time")]
-    gtfs$trips <- gtfs$trips [, c ("route_id", "service_id", "trip_id", "trip_headsign")]
+    gtfs$transfers <- gtfs$transfers [, c ("from_stop_id", "to_stop_id",
+                                           "min_transfer_time")]
+    gtfs$trips <- gtfs$trips [, c ("route_id", "service_id", "trip_id",
+                                   "trip_headsign")]
 
     fname <- get_rds_name (vars$file)
     saveRDS (gtfs, fname)
@@ -188,13 +191,13 @@ process_gtfs_local <- function (expand = 2)
 reduce_to_local_stops <- function (gtfs, expand = 2)
 {
     # remove no visible binding notes:
-    stop_name <- stop_lon <- stop_lat <- from_stop_id <- to_stop_id <- 
+    stop_name <- stop_lon <- stop_lat <- from_stop_id <- to_stop_id <-
         stop_id <- trip_id <- NULL
 
     vars <- get_envvars ()
-    xy <- rbind (gtfs$stops [grep (vars$home, gtfs$stops [, stop_name]), 
+    xy <- rbind (gtfs$stops [grep (vars$home, gtfs$stops [, stop_name]),
                              c ("stop_lon", "stop_lat")],
-                 gtfs$stops [grep (vars$work, gtfs$stops [, stop_name]), 
+                 gtfs$stops [grep (vars$work, gtfs$stops [, stop_name]),
                              c ("stop_lon", "stop_lat")])
     bb <- apply (xy, 2, range)
     bb <- apply (bb, 2, function (i) mean (i) + c (-expand, expand) * diff (i))

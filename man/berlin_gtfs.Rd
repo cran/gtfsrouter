@@ -4,7 +4,8 @@
 \name{berlin_gtfs}
 \alias{berlin_gtfs}
 \title{berlin_gtfs}
-\format{A list of five \pkg{data.table} items necessary for routing:
+\format{
+A list of five \pkg{data.table} items necessary for routing:
 \itemize{
 \item calendar
 \item routes
@@ -12,9 +13,14 @@
 \item stop_times
 \item stops
 \item transfers
-}}
+}
+}
 \value{
-square matrix of distances between nodes
+For single (from, to) values, a \code{data.frame} describing the route,
+with each row representing one stop. For multiple (from, to) values, a list
+of \code{data.frames}, each of which describes one route between the i'th start
+and end stations (\code{from} and \code{to} values). Origin and destination stations
+for which no route is possible return \code{NULL}.
 }
 \description{
 Sample GTFS data from Verkehrsverbund Berlin-Brandenburg street, reduced to U

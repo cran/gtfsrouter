@@ -5,12 +5,17 @@
 #'
 #' @param gtfs A set of GTFS data returned from \link{extract_gtfs} or, for more
 #' efficient queries, pre-processed with \link{gtfs_timetable}.
-#' @param from Name of start station
+#' @param from Name, ID, or approximate (lon, lat) coordinates of start station
+#' (as `stop_name` or `stop_id` entry in the `stops` table, or a vector of two
+#' numeric values).
 #' @param start_time Desired departure time at `from` station, either in seconds
 #' after midnight, a vector of two or three integers (hours, minutes) or (hours,
 #' minutes, seconds), an object of class \link{difftime}, \pkg{hms}, or
 #' \pkg{lubridate}.
 #' @param end_time End time to calculate isochrone
+#' @param from_is_id Set to `TRUE` to enable `from` parameter to specify entry
+#' in `stop_id` rather than `stop_name` column of the `stops` table (same as
+#' `from_to_are_ids` parameter of \link{gtfs_route}).
 #' @param route_pattern Using only those routes matching given pattern, for
 #' example, "^U" for routes starting with "U" (as commonly used for underground
 #' or subway routes. (Parameter not used at all if `gtfs` has already been
@@ -22,8 +27,9 @@
 #'
 #' @return An object of class `gtfs_isochrone`, including \pkg{sf}-formatted
 #' points representing the `from` station (`start_point`), the terminal end
-#' stations (`end_points`), and all intermediate stations (`mid_points`), along
-#' with lines representing the individual routes. A non-convex ("alpha") hull is
+#' stations (`end_points`), and all intermediate stations (`mid_points`) each with
+#' the earliest possible arrival time, along with lines representing the individual routes. 
+#' A non-convex ("alpha") hull is
 #' also returned (as an \pkg{sf} `POLYGON` object), including measures of area
 #' and "elongation", which equals zero for a circle, and increases towards one
 #' for more elongated shapes.
@@ -43,9 +49,10 @@
 #' \dontrun{
 #' plot (ic)
 #' }
-#' @export 
+#' @export
 gtfs_isochrone <- function (gtfs, from, start_time, end_time, day = NULL,
-                            route_pattern = NULL, hull_alpha = 0.1, quiet = FALSE)
+                            from_is_id = FALSE, route_pattern = NULL,
+                            hull_alpha = 0.1, quiet = FALSE)
 {
     requireNamespace ("geodist")
     requireNamespace ("lwgeom")
@@ -65,7 +72,7 @@ gtfs_isochrone <- function (gtfs, from, start_time, end_time, day = NULL,
         stop ("There are no scheduled services after that time.")
 
     stations <- NULL # no visible binding note
-    start_stns <- station_name_to_ids (from, gtfs_cp)
+    start_stns <- station_name_to_ids (from, gtfs_cp, from_is_id)
 
     isotrips <- get_isotrips (gtfs_cp, start_stns, start_time, end_time)
 
@@ -73,7 +80,10 @@ gtfs_isochrone <- function (gtfs, from, start_time, end_time, day = NULL,
     xy <- as.numeric (isotrips$isotrips [[1]] [1, c ("stop_lon", "stop_lat")])
     startpt <- sf::st_sfc (sf::st_point (xy), crs = 4326)
     nm <- isotrips$isotrips [[1]] [1, "stop_name"]
-    startpt <- sf::st_sf ("stop_name" = nm, geometry = startpt)
+    id <- isotrips$isotrips [[1]] [1, "stop_id"]
+    startpt <- sf::st_sf ("stop_name" = nm,
+                          "stop_id" = id,
+                          geometry = startpt)
 
     hull <- NULL
     if (length (isotrips$isotrips) > 1)
@@ -96,6 +106,10 @@ get_isotrips <- function (gtfs, start_stns, start_time, end_time)
     # no visible binding note:
     stop_id <- trip_id <- NULL
 
+    # the C++ function returns a single list with elements group in threes:
+    # 1. End stations
+    # 2. Trip numbers
+    # 3. Arrival times at each end station
     stns <- rcpp_csa_isochrone (gtfs$timetable, gtfs$transfers,
                                 nrow (gtfs$stop_ids), nrow (gtfs$trip_ids),
                                 start_stns, start_time, end_time)
@@ -104,8 +118,9 @@ get_isotrips <- function (gtfs, start_stns, start_time, end_time)
 
     actual_start_time <- as.numeric (stns [length (stns)])
 
-    index <- 2 * 1:((length (stns) - 1) / 2) - 1
+    index <- 3 * 1:((length (stns) - 1) / 3) - 2
     trips <- stns [index + 1]
+    earliest_arrival <- stns [index + 2]
     stns <- stns [index]
 
     stop_ids <- lapply (stns, function (i) gtfs$stop_ids [i] [, stop_ids])
@@ -117,7 +132,9 @@ get_isotrips <- function (gtfs, start_stns, start_time, end_time)
         trips <- gtfs$trips [match (trip_ids [[i]], gtfs$trips [, trip_id]), ]
         data.frame (cbind (stops [, c ("stop_id", "stop_name", "parent_station",
                                        "stop_lon", "stop_lat")]),
-                    cbind (trips [, c ("route_id", "trip_id", "trip_headsign")]))
+                    cbind (trips [, c ("route_id", "trip_id",
+                                       "trip_headsign")]),
+                    cbind ("earliest_arrival" = c(actual_start_time, earliest_arrival[[i]])))
                    })
 
     list (isotrips = isotrips,
@@ -125,7 +142,8 @@ get_isotrips <- function (gtfs, start_stns, start_time, end_time)
           end_time = actual_start_time + end_time - start_time)
 }
 
-# convert list of data.frames of stops and trips into sf linestrings for each route
+# convert list of data.frames of stops and trips into sf linestrings for each
+# route
 route_to_linestring <- function (x)
 {
     # split each route into trip IDs
@@ -169,7 +187,15 @@ route_endpoints <- function (x)
     g <- sf::st_as_sf (xy, coords = 1:2, crs = 4326)$geometry
     nms <- vapply (x, function (i)
                   i [nrow (i), "stop_name"], character (1))
-    sf::st_sf ("stop_name" = nms, geometry = g)
+    ids <- vapply (x, function (i)
+                  i [nrow (i), "stop_id"], character (1))
+    earliest_arrival <- vapply (x, function (i)
+        i [nrow (i), "earliest_arrival"], numeric(1))
+
+    sf::st_sf ("stop_name" = nms,
+               "stop_id" = ids,
+               "earliest_arrival" = earliest_arrival,
+               geometry = g)
 }
 
 route_midpoints <- function (x)
@@ -181,7 +207,14 @@ route_midpoints <- function (x)
     g <- sf::st_as_sf (xy, coords = 1:2, crs = 4326)$geometry
     nms <- lapply (x, function (i)
                   i [2:(nrow (i) - 1), "stop_name"])
-    sf::st_sf ("stop_name" = do.call (c, nms), geometry = g)
+    ids <- lapply (x, function (i)
+                  i [2:(nrow (i) - 1), "stop_id"])
+    earliest_arrival <- lapply (x, function (i)
+        i [2:(nrow (i) - 1), "earliest_arrival"])
+    sf::st_sf ("stop_name" = do.call (c, nms),
+               "stop_id" = do.call (c, ids),
+               "earliest_arrival" = do.call (c, earliest_arrival),
+               geometry = g)
 }
 
 # x is isolines
@@ -252,29 +285,4 @@ get_ahull <- function (x, alpha = alpha)
         inds <- inds [-j, , drop = FALSE] #nolint
     }
     xy [match (ind_seq, xy$ind), ]
-}
-
-#' plot.gtfs_isochrone
-#'
-#' @name plot.gtfs_ischrone
-#' @param x object to be plotted
-#' @param ... ignored here
-#' @export
-plot.gtfs_isochrone <- function (x, ...)
-{
-    requireNamespace ("sf")
-    requireNamespace ("alphahull")
-    requireNamespace ("mapview")
-
-    allpts <- rbind (x$start_pt, x$mid_points, x$end_points)
-
-    m <- mapview::mapview (allpts, color = "grey", cex = 3, legend = FALSE)
-    m <- mapview::addFeatures (m, x$hull, color = "orange", alpha.regions = 0.2)
-    m <- mapview::addFeatures (m, x$routes, colour = "blue")
-    m <- mapview::addFeatures (m, x$start_point, radius = 5, color = "green")
-    m <- mapview::addFeatures (m, x$end_points, radius = 4, color = "red",
-                               fill = TRUE, fillOpacity = 0.8, fillColor = "red")
-
-    print (m)
-    invisible (m)
 }
