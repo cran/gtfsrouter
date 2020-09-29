@@ -64,6 +64,12 @@ struct CSA_Return
     int earliest_time;
 };
 
+struct CSA_Multi_Return
+{
+    std::vector <size_t> end_station;
+    std::vector <int> earliest_time;
+};
+
 namespace csa {
 
 void fill_csa_pars (CSA_Parameters &csa_pars, int max_transfers, int start_time,

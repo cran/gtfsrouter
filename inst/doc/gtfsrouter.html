@@ -11,7 +11,7 @@
 
 <meta name="author" content="Mark Padgham" />
 
-<meta name="date" content="2020-08-27" />
+<meta name="date" content="2020-09-29" />
 
 <title>gtfsrouter</title>
 
@@ -1543,7 +1543,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">gtfsrouter</h1>
 <h4 class="author">Mark Padgham</h4>
-<h4 class="date">2020-08-27</h4>
+<h4 class="date">2020-09-29</h4>
 
 </div>
 
@@ -1578,7 +1578,7 @@ file.exists (f)</code></pre>
 <pre class="r"><code>from &lt;- &quot;Innsbrucker Platz&quot;
 to &lt;- &quot;Alexanderplatz&quot;
 gtfs_route (gtfs, from = from, to = to)</code></pre>
-<pre><code>## Day not specified; extracting timetable for Thursday</code></pre>
+<pre><code>## Day not specified; extracting timetable for Tuesday</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -1730,7 +1730,7 @@ gtfs_route (gtfs, from = from, to = to)</code></pre>
 to &lt;- &quot;Alexanderplatz&quot;
 system.time (gtfs_route (gtfs, from = from, to = to, start_time = &quot;12:00:00&quot;, day = &quot;Sunday&quot;))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.193   0.000   0.052</code></pre>
+##   0.202   0.000   0.055</code></pre>
 <pre class="r"><code>names (gtfs)</code></pre>
 <pre><code>## [1] &quot;calendar&quot;   &quot;routes&quot;     &quot;trips&quot;      &quot;stop_times&quot; &quot;stops&quot;     
 ## [6] &quot;transfers&quot;</code></pre>
@@ -1740,7 +1740,7 @@ names (gtfs)</code></pre>
 ## [6] &quot;transfers&quot;  &quot;timetable&quot;  &quot;stop_ids&quot;   &quot;trip_ids&quot;</code></pre>
 <pre class="r"><code>system.time (gtfs_route (gtfs, from = from, to = to, start_time = &quot;12:00:00&quot;))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.156   0.000   0.041</code></pre>
+##   0.163   0.000   0.043</code></pre>
 <p>Note that the <code>day</code> parameter is used to extract the timetable, after which it is no longer required in the actual call to <code>gtfs_route()</code>.</p>
 </div>
 <div id="routing-by-mode-of-transport" class="section level2">
@@ -2147,10 +2147,9 @@ gtfs_data = &quot;/full/path/to/gtfs.zip&quot;</code></pre>
 ## 10         U8 S+U Hermannstr.         S+U Hermannstr. (Berlin)     12:37:30
 ## 11        S41  S Sudkreuz Bhf         S+U Hermannstr. (Berlin)     12:39:24
 ## 12        S41  S Sudkreuz Bhf           S+U Tempelhof (Berlin)     12:43:12
-## 13        S41  S Sudkreuz Bhf          S Sudkreuz Bhf (Berlin)     12:45:30
-## 14        S41  S Sudkreuz Bhf          S Sudkreuz Bhf (Berlin)     12:46:12
-## 15        S41  S Sudkreuz Bhf            S Schoneberg (Berlin)     12:47:42
-## 16        S41  S Sudkreuz Bhf   S+U Innsbrucker Platz (Berlin)     12:49:24
+## 13        S41  S Sudkreuz Bhf          S Sudkreuz Bhf (Berlin)     12:46:12
+## 14        S41  S Sudkreuz Bhf            S Schoneberg (Berlin)     12:47:42
+## 15        S41  S Sudkreuz Bhf   S+U Innsbrucker Platz (Berlin)     12:49:24
 ##    departure_time
 ## 1        12:23:30
 ## 2        12:25:00
@@ -2164,10 +2163,9 @@ gtfs_data = &quot;/full/path/to/gtfs.zip&quot;</code></pre>
 ## 10       12:37:30
 ## 11       12:39:54
 ## 12       12:43:42
-## 13       12:45:30
-## 14       12:46:12
-## 15       12:48:12
-## 16       12:49:54</code></pre>
+## 13       12:46:12
+## 14       12:48:12
+## 15       12:49:54</code></pre>
 <p>The service after that can be retrieved with <code>go_home (wait = 2)</code>, and so on.</p>
 </div>
 <div id="isochrones" class="section level1">
@@ -2190,7 +2188,7 @@ ic &lt;- gtfs_isochrone (gtfs,
 <pre><code>## Registered S3 method overwritten by &#39;spatstat&#39;:
 ##   method     from
 ##   print.boxx cli</code></pre>
-<pre><code>## Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1</code></pre>
+<pre><code>## Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.2</code></pre>
 <p>Note that the isochrone will be calculated out to five minutes after the first service to depart from Alexander Platz <em>after</em> 12:00. If, for example, this first service actually departs at 12:02, then the isochrones will define the range of all services leaving that station and travelling until 12:07. This function returns an object of class <code>gtfs_isochrone</code>, which has the following structure:</p>
 <pre class="r"><code>str (ic)</code></pre>
 <pre><code>## List of 7
