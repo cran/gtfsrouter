@@ -11,25 +11,45 @@ gtfs <- extract_gtfs (f)
 ## ----route1-fakey, eval = FALSE-----------------------------------------------
 #  from <- "Innsbrucker Platz"
 #  to <- "Alexanderplatz"
-#  gtfs_route (gtfs, from = from, to = to)
+#  gtfs_route (gtfs,
+#              from = from,
+#              to = to)
 
 ## ----route1, eval = TRUE, echo = FALSE----------------------------------------
 from <- "Innsbrucker Platz"
 to <- "Alexanderplatz"
-knitr::kable (gtfs_route (gtfs, from = from, to = to, start_time = "12:00:00"))
+knitr::kable (gtfs_route (gtfs,
+                          from = from,
+                          to = to,
+                          start_time = "12:00:00"))
 
 ## ----route2, eval = TRUE------------------------------------------------------
-route <- gtfs_route (gtfs, from = from, to = to, start_time = "12:00:00", day = "Sunday")
+route <- gtfs_route (gtfs,
+                     from = from,
+                     to = to,
+                     start_time = "12:00:00",
+                     day = "Sunday")
 
 ## ----timetable----------------------------------------------------------------
 gtfs <- extract_gtfs (f)
 from <- "Innsbrucker Platz"
 to <- "Alexanderplatz"
-system.time (gtfs_route (gtfs, from = from, to = to, start_time = "12:00:00", day = "Sunday"))
+system.time (
+    gtfs_route (gtfs,
+                from = from,
+                to = to,
+                start_time = "12:00:00",
+                day = "Sunday")
+    )
 names (gtfs)
-gtfs <- gtfs_timetable (gtfs, day = "Sunday") # explicit pre-processing to extract timetable for Sunday
+# explicit pre-processing to extract timetable for Sunday
+gtfs <- gtfs_timetable (gtfs,
+                        day = "Sunday")
 names (gtfs)
-system.time (gtfs_route (gtfs, from = from, to = to, start_time = "12:00:00"))
+system.time (gtfs_route (gtfs,
+                         from = from,
+                         to = to,
+                         start_time = "12:00:00"))
 
 ## ----gtfs_route_table-fakey, eval = FALSE-------------------------------------
 #  head (gtfs$route)
@@ -38,25 +58,54 @@ system.time (gtfs_route (gtfs, from = from, to = to, start_time = "12:00:00"))
 knitr::kable (head (gtfs$route))
 
 ## ----route3-fakey, eval = FALSE-----------------------------------------------
-#  gtfs_route (gtfs, from = from, to = to, start_time = "12:00:00", day = "Sunday", route_pattern = "^S")
+#  gtfs_route (gtfs,
+#              from = from,
+#              to = to,
+#              start_time = "12:00:00",
+#              day = "Sunday",
+#              route_pattern = "^S")
 
 ## ----route3, echo = FALSE, eval = TRUE----------------------------------------
-knitr::kable (gtfs_route (gtfs, from = from, to = to, start_time = "12:00:00", day = "Sunday", route_pattern = "^S"))
+knitr::kable (gtfs_route (gtfs,
+                          from = from,
+                          to = to,
+                          start_time = "12:00:00",
+                          day = "Sunday",
+                          route_pattern = "^S"))
 
 ## ----route4a-fakey, eval = FALSE----------------------------------------------
 #  from <- "Alexanderplatz"
 #  to <- "Pankow"
-#  gtfs_route (gtfs, from = from, to = to, start_time = "12:00:00", day = "Sunday", earliest_arrival = FALSE)
+#  gtfs_route (gtfs,
+#              from = from,
+#              to = to,
+#              start_time = "12:00:00",
+#              day = "Sunday",
+#              earliest_arrival = FALSE)
 
 ## ----route4a, eval = TRUE, echo = FALSE---------------------------------------
 from <- "Alexanderplatz"
 to <- "Pankow"
-r1 <- gtfs_route (gtfs, from = from, to = to, start_time = "12:00:00", day = "Sunday")
-r2 <- gtfs_route (gtfs, from = from, to = to, start_time = "12:00:00", day = "Sunday", earliest_arrival = FALSE)
+r1 <- gtfs_route (gtfs,
+                  from = from,
+                  to = to,
+                  start_time = "12:00:00",
+                  day = "Sunday")
+r2 <- gtfs_route (gtfs,
+                  from = from,
+                  to = to,
+                  start_time = "12:00:00",
+                  day = "Sunday",
+                  earliest_arrival = FALSE)
 knitr::kable (r2)
 
 ## ----route4b-fakey, eval = FALSE----------------------------------------------
-#  gtfs_route (gtfs, from = from, to = to, start_time = "12:00:00", day = "Sunday", earliest_arrival = TRUE)
+#  gtfs_route (gtfs,
+#              from = from,
+#              to = to,
+#              start_time = "12:00:00",
+#              day = "Sunday",
+#              earliest_arrival = TRUE)
 
 ## ----route4b, eval = TRUE, echo = FALSE---------------------------------------
 knitr::kable (r1)
@@ -99,36 +148,4 @@ go_home (start_time = "12:20") # next available service
 
 ## ----home-work2, echo = FALSE-------------------------------------------------
 go_home (start_time = "12:20", wait = 1)
-
-## ----extract-again, eval = FALSE----------------------------------------------
-#  berlin_gtfs_to_zip ()
-#  f <- file.path (tempdir (), "vbb.zip")
-#  gtfs <- extract_gtfs (f)
-#  gtfs <- gtfs_timetable (gtfs, day = 3)
-
-## ----isochrone----------------------------------------------------------------
-from <- "Alexanderplatz"
-start_time <- "12:05"
-end_time <- "12:10"
-ic <- gtfs_isochrone (gtfs,
-                      from = from,
-                      start_time = start_time,
-                      end_time = end_time)
-
-## -----------------------------------------------------------------------------
-str (ic)
-
-## ----isochrone-exists, echo = FALSE-------------------------------------------
-fig_name <- "isochrone.png"
-isochrone_exists <- file.exists (fig_name)
-
-## ----isochrone-plot, eval = FALSE---------------------------------------------
-#  plot (ic)
-
-## ----isochrone-mapshot, eval = !isochrone_exists, echo = FALSE----------------
-#  m <- plot (ic)
-#  mapview::mapshot (m, file = fig_name)
-
-## ----isochrone-mapshot-plot, echo = FALSE, out.width = "100%"-----------------
-knitr::include_graphics (fig_name)
 

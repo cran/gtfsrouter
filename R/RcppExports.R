@@ -17,31 +17,6 @@ rcpp_time_to_seconds <- function(times) {
     .Call(`_gtfsrouter_rcpp_time_to_seconds`, times)
 }
 
-#' rcpp_csa_isochrone
-#'
-#' Calculate isochrones using Connection Scan Algorithm for GTFS data. Works
-#' largely as rcpp_csa. Returns a list of integer vectors, with [i] holding
-#' sequences of stations on a given route, the end one being the terminal
-#' isochrone point, and [i+1] holding correpsonding trip numbers.
-#'
-#' All elements of all data are 1-indexed
-#'
-#' @noRd
-rcpp_csa_isochrone <- function(timetable, transfers, nstations, ntrips, start_stations, start_time, end_time) {
-    .Call(`_gtfsrouter_rcpp_csa_isochrone`, timetable, transfers, nstations, ntrips, start_stations, start_time, end_time)
-}
-
-#' rcpp_csa_matrix
-#'
-#' Not really CSA, rather a full-timetable scan for all connections from
-#' everywhere to everywhere which returns only start and end times for each
-#' pair of (start, end) points.
-#'
-#' @noRd
-rcpp_csa_matrix <- function(timetable, transfers, nstations, ntrips, start_stations, end_stations, start_time, max_transfers) {
-    .Call(`_gtfsrouter_rcpp_csa_matrix`, timetable, transfers, nstations, ntrips, start_stations, end_stations, start_time, max_transfers)
-}
-
 #' rcpp_make_timetable
 #'
 #' Make timetable from GTFS stop_times. Both stop_ids and trip_ids are vectors
@@ -56,7 +31,7 @@ rcpp_make_timetable <- function(stop_times, stop_ids, trip_ids) {
 #' rcpp_csa
 #'
 #' Connection Scan Algorithm for GTFS data. The timetable has 
-#' [deparutre_station, arrival_station, departure_time, arrival_time,
+#' [departure_station, arrival_station, departure_time, arrival_time,
 #'     trip_id],
 #' with all entries as integer values, including times in seconds after
 #' 00:00:00. The station and trip IDs can be mapped back on to actual station
@@ -73,3 +48,30 @@ rcpp_csa <- function(timetable, transfers, nstations, ntrips, start_stations, en
     .Call(`_gtfsrouter_rcpp_csa`, timetable, transfers, nstations, ntrips, start_stations, end_stations, start_time, max_transfers)
 }
 
+#' rcpp_isochrone
+#'
+#' Calculate isochrones using Connection Scan Algorithm for GTFS data. Works
+#' largely as rcpp_csa. Returns a list of integer vectors, with [i] holding
+#' sequences of stations on a given route, the end one being the terminal
+#' isochrone point, and [i+1] holding correpsonding trip numbers.
+#'
+#' All elements of all data are 1-indexed
+#'
+#' @noRd
+rcpp_isochrone <- function(timetable, transfers, nstations, start_stations, start_time, end_time, minimise_transfers) {
+    .Call(`_gtfsrouter_rcpp_isochrone`, timetable, transfers, nstations, start_stations, start_time, end_time, minimise_transfers)
+}
+
+#' rcpp_traveltimes
+#'
+#' Calculate isochrones using Connection Scan Algorithm for GTFS data. Works
+#' largely as rcpp_csa. Returns a list of integer vectors, with [i] holding
+#' sequences of stations on a given route, the end one being the terminal
+#' isochrone point, and [i+1] holding correpsonding trip numbers.
+#'
+#' All elements of all data are 1-indexed
+#'
+#' @noRd
+rcpp_traveltimes <- function(timetable, transfers, nstations, start_stations, start_time_min, start_time_max, minimise_transfers, max_traveltime) {
+    .Call(`_gtfsrouter_rcpp_traveltimes`, timetable, transfers, nstations, start_stations, start_time_min, start_time_max, minimise_transfers, max_traveltime)
+}

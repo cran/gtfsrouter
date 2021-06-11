@@ -13,6 +13,7 @@ gtfs_route(
   route_pattern = NULL,
   earliest_arrival = TRUE,
   include_ids = FALSE,
+  grep_fixed = TRUE,
   max_transfers = NA,
   from_to_are_ids = FALSE,
   quiet = FALSE
@@ -41,8 +42,11 @@ used. (Not used if \code{gtfs} has already been prepared with
 
 \item{route_pattern}{Using only those routes matching given pattern, for
 example, "^U" for routes starting with "U" (as commonly used for underground
-or subway routes. (Parameter not used at all if \code{gtfs} has already been
-prepared with \link{gtfs_timetable}.)}
+or subway routes. To negate the \code{route_pattern} -- that is, to include all
+routes except those matching the pattern -- prepend the value with "!"; for
+example "!^U" will include all services except those starting with "U". (This
+parameter is not used at all if \code{gtfs} has already been prepared with
+\link{gtfs_timetable}.)}
 
 \item{earliest_arrival}{If \code{FALSE}, routing will be with the first-departing
 service, which may not provide the earliest arrival at the \code{to} station. This
@@ -53,8 +57,16 @@ one, and so will be generally twice as fast.}
 \item{include_ids}{If \code{TRUE}, result will include columns containing
 GTFS-specific identifiers for routes, trips, and stops.}
 
-\item{max_transfers}{If not \code{NA}, specify a maximum number of transfers
-(including but not exceeding this number) for the route.}
+\item{grep_fixed}{If \code{FALSE}, match station names (when passed as character
+string) with \code{grep(..., fixed = FALSE)}, to allow use of \code{grep} expressions.
+This is useful to refine matches in cases where desired stations may match
+multiple entries.}
+
+\item{max_transfers}{If not \code{NA}, specify a desired maximum number of
+transfers for the route (including but not exceeding this number). This
+parameter may be used to generate alternative routes with fewer transfers,
+although actual numbers of transfers may still exceed this number if a value
+is specified which exceeds the minimal feasible number of transfers.}
 
 \item{from_to_are_ids}{Set to \code{TRUE} to enable \code{from} and \code{to} parameter to
 specify entries in \code{stop_id} rather than \code{stop_name} column of the \code{stops}

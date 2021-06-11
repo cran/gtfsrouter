@@ -1,5 +1,8 @@
 #' gtfs_isochrone
 #'
+#' NOTE: This function has been deprecated. Please use \link{gtfs_traveltimes}
+#' instead.
+#'
 #' Calculate a single isochrone from a given start station, returning the list
 #' of all stations reachable to the specified `end_time`.
 #'
@@ -16,10 +19,9 @@
 #' @param from_is_id Set to `TRUE` to enable `from` parameter to specify entry
 #' in `stop_id` rather than `stop_name` column of the `stops` table (same as
 #' `from_to_are_ids` parameter of \link{gtfs_route}).
-#' @param route_pattern Using only those routes matching given pattern, for
-#' example, "^U" for routes starting with "U" (as commonly used for underground
-#' or subway routes. (Parameter not used at all if `gtfs` has already been
-#' prepared with \link{gtfs_timetable}.)
+#' @param minimise_transfers If `TRUE`, isochrones are calculated with
+#' minimal-transfer connections to each end point, even if those connections are
+#' slower than alternative connections with transfers.
 #' @param hull_alpha alpha value of non-convex hulls returned as part of result
 #' (see ?alphashape::ashape for details).
 #'
@@ -27,12 +29,12 @@
 #'
 #' @return An object of class `gtfs_isochrone`, including \pkg{sf}-formatted
 #' points representing the `from` station (`start_point`), the terminal end
-#' stations (`end_points`), and all intermediate stations (`mid_points`) each with
-#' the earliest possible arrival time, along with lines representing the individual routes. 
-#' A non-convex ("alpha") hull is
-#' also returned (as an \pkg{sf} `POLYGON` object), including measures of area
-#' and "elongation", which equals zero for a circle, and increases towards one
-#' for more elongated shapes.
+#' stations (`end_points`), and all intermediate stations (`mid_points`) each
+#' with the earliest possible arrival time, along with lines representing the
+#' individual routes. A non-convex ("alpha") hull is also returned (as an
+#' \pkg{sf} `POLYGON` object), including measures of area and "elongation",
+#' which equals zero for a circle, and increases towards one for more elongated
+#' shapes.
 #'
 #' @examples
 #' berlin_gtfs_to_zip ()
@@ -42,18 +44,21 @@
 #' from <- "Alexanderplatz"
 #' start_time <- 12 * 3600 + 600
 #' end_time <- start_time + 600
+#' \dontrun{ # function is deprecated!
 #' ic <- gtfs_isochrone (g,
 #'                       from = from,
 #'                       start_time = start_time,
 #'                       end_time = end_time)
-#' \dontrun{
 #' plot (ic)
 #' }
 #' @export
 gtfs_isochrone <- function (gtfs, from, start_time, end_time, day = NULL,
-                            from_is_id = FALSE, route_pattern = NULL,
-                            hull_alpha = 0.1, quiet = FALSE)
-{
+                            from_is_id = FALSE, grep_fixed = TRUE,
+                            route_pattern = NULL, minimise_transfers = FALSE,
+                            hull_alpha = 0.1, quiet = FALSE) {
+
+    .Deprecated ("gtfs_traveltimes")
+
     requireNamespace ("geodist")
     requireNamespace ("lwgeom")
 
@@ -71,10 +76,11 @@ gtfs_isochrone <- function (gtfs, from, start_time, end_time, day = NULL,
     if (nrow (gtfs_cp$timetable) == 0)
         stop ("There are no scheduled services after that time.")
 
-    stations <- NULL # no visible binding note
-    start_stns <- station_name_to_ids (from, gtfs_cp, from_is_id)
+    stations <- NULL # no visible binding note # nolint
+    start_stns <- station_name_to_ids (from, gtfs_cp, from_is_id, grep_fixed)
 
-    isotrips <- get_isotrips (gtfs_cp, start_stns, start_time, end_time)
+    isotrips <- get_isotrips (gtfs_cp, start_stns, start_time, end_time,
+                              minimise_transfers)
 
     routes <- route_to_linestring (isotrips$isotrips)
     xy <- as.numeric (isotrips$isotrips [[1]] [1, c ("stop_lon", "stop_lat")])
@@ -101,85 +107,97 @@ gtfs_isochrone <- function (gtfs, from, start_time, end_time, day = NULL,
     return (res)
 }
 
-get_isotrips <- function (gtfs, start_stns, start_time, end_time)
-{
-    # no visible binding note:
-    stop_id <- trip_id <- NULL
+get_isotrips <- function (gtfs, start_stns, start_time, end_time,
+                          minimise_transfers = FALSE) {
+
+    stop_id <- trip_id <- NULL # no visible binding note:# nolint
 
     # the C++ function returns a single list with elements group in threes:
     # 1. End stations
     # 2. Trip numbers
     # 3. Arrival times at each end station
-    stns <- rcpp_csa_isochrone (gtfs$timetable, gtfs$transfers,
-                                nrow (gtfs$stop_ids), nrow (gtfs$trip_ids),
-                                start_stns, start_time, end_time)
+    stns <- rcpp_isochrone (gtfs$timetable, gtfs$transfers,
+                            nrow (gtfs$stop_ids), start_stns,
+                            start_time, end_time,
+                            minimise_transfers)
     if (length (stns) < 2)
         stop ("No isochrone possible") # nocov
 
-    actual_start_time <- as.numeric (stns [length (stns)])
+    # rcpp_isochrone returns a list with elements of both int and size_t, with
+    # the mixed storage mode converted in R to numeric and not integer.
+    stns <- lapply (stns, as.integer)
 
     index <- 3 * 1:((length (stns) - 1) / 3) - 2
     trips <- stns [index + 1]
     earliest_arrival <- stns [index + 2]
     stns <- stns [index]
 
-    stop_ids <- lapply (stns, function (i) gtfs$stop_ids [i] [, stop_ids])
-    trip_ids <- lapply (trips, function (i) gtfs$trip_ids [i] [, trip_ids])
+    index <- which (vapply (stns, function (i) !is.null (i), logical (1)))
+    # replace MAXINT trips with NA:
+    trips <- lapply (trips [index], function (i) {
+                     i [which (i == .Machine$integer.max)] <- NA_integer_
+                     return (i) })
+    earliest_arrival <- earliest_arrival [index]
+    stns <- stns [index]
 
-    isotrips <- lapply (seq (stop_ids), function (i)
-                   {
-        stops <- gtfs$stops [match (stop_ids [[i]], gtfs$stops [, stop_id]), ]
-        trips <- gtfs$trips [match (trip_ids [[i]], gtfs$trips [, trip_id]), ]
-        data.frame (cbind (stops [, c ("stop_id", "stop_name", "parent_station",
-                                       "stop_lon", "stop_lat")]),
-                    cbind (trips [, c ("route_id", "trip_id",
-                                       "trip_headsign")]),
-                    cbind ("earliest_arrival" = c(actual_start_time, earliest_arrival[[i]])))
+    # rm any notional end stations which are part of other journeys
+    end_stns <- vapply (stns, function (i) i [length (i)], integer (1))
+    non_end_stns <- unlist (lapply (stns, function (i) i [-length (i)]))
+    index <- which (!end_stns %in% non_end_stns)
+
+    trips <- trips [index]
+    earliest_arrival <- earliest_arrival [index]
+    stns <- stns [index]
+
+    actual_start_time <- min (vapply (earliest_arrival, min, integer (1)))
+
+    isotrips <- lapply (seq (stns), function (i) {
+                       s <- gtfs$stops [stns [[i]],
+                                        c ("stop_id",
+                                           "stop_name",
+                                           "parent_station",
+                                           "stop_lon",
+                                           "stop_lat")]
+                       tr <- gtfs$trips [trips [[i]],
+                                         c ("route_id",
+                                            "trip_id",
+                                            "trip_headsign")]
+                       # get num transfers
+                       index <- which (!is.na (trips [[i]]))
+                       tripi <- stats::na.omit (trips [[i]])
+                       ntransfers <- match (tripi, unique (tripi)) - 1L
+                       tr$ntransfers <- NA_integer_
+                       tr$ntransfers [index] <- ntransfers
+
+                       e <- hms::hms (earliest_arrival [[i]])
+                       ret <- data.frame (cbind (s,
+                                                 tr,
+                                                 earliest_arrival = e))
                    })
+
+    # Then cut them down to within the alloted isochrone durations:
+    dur <- end_time - start_time
+    isotrips <- lapply (isotrips, function (i) {
+                            tdiff <- i$earliest_arrival - i$earliest_arrival [1]
+                            return (i [which (tdiff < dur), ])  })
+    isotrips <- isotrips [which (!duplicated (isotrips))]
 
     list (isotrips = isotrips,
           start_time = actual_start_time,
-          end_time = actual_start_time + end_time - start_time)
+          end_time = as.integer (actual_start_time + end_time - start_time))
 }
 
-# convert list of data.frames of stops and trips into sf linestrings for each
-# route
-route_to_linestring <- function (x)
-{
-    # split each route into trip IDs
-    xsp <- list ()
-    for (i in x)
-        xsp <- c (xsp, split (i, f = as.factor (i$trip_id)))
-    names (xsp) <- NULL
-    # remove the trip info so unique sequences of stops can be identified
-    xsp <- lapply (xsp, function (i) {
-                       i [c ("route_id", "trip_id", "trip_headsign")] <- NULL
-                       return (i)
-                   })
-    xsp <- xsp [!duplicated (xsp)]
-    lens <- vapply (xsp, nrow, numeric (1))
-    xsp <- xsp [which (lens > 1)]
+# convert each isotrip to sf linestring
+route_to_linestring <- function (x) {
 
-    # Then determine which sequences are sub-sequences of others already present
-    lens <- vapply (xsp, nrow, numeric (1))
-    xsp <- xsp [order (lens)]
-    # paste all sequences of stop_ids
-    stop_seqs <- vapply (xsp, function (i) paste0 (i$stop_id, collapse = ""),
-                         character (1))
-    # then find the longest sequence matching each - this can be done with a
-    # simple "max" because of the above ordering by length
-    index <- unlist (lapply (stop_seqs, function (i) max (grep (i, stop_seqs))))
-    xsp <- xsp [sort (unique (index))]
-
-    # Then convert to linestring geometries
-    xy <- lapply (xsp, function (i)
+    xy <- lapply (x, function (i)
                   sf::st_linestring (cbind (i$stop_lon, i$stop_lat)))
     sf::st_sfc (xy, crs = 4326)
 }
 
 # extract endpoints of each route as sf point objects
-route_endpoints <- function (x)
-{
+route_endpoints <- function (x) {
+
     xy <- lapply (x, function (i)
                   as.numeric (i [nrow (i), c ("stop_lon", "stop_lat")]))
     xy <- do.call (rbind, xy)
@@ -189,37 +207,66 @@ route_endpoints <- function (x)
                   i [nrow (i), "stop_name"], character (1))
     ids <- vapply (x, function (i)
                   i [nrow (i), "stop_id"], character (1))
-    earliest_arrival <- vapply (x, function (i)
-        i [nrow (i), "earliest_arrival"], numeric(1))
+    arrival <- vapply (x, function (i)
+                       i [nrow (i), "earliest_arrival"],
+                       hms::hms (1))
+    departure <- vapply (x, function (i)
+                        i$earliest_arrival [1],
+                        hms::hms (1))
+
+    transfers <- vapply (x, function (i)
+                         max (i$ntransfers, na.rm = TRUE),
+                         integer (1))
 
     sf::st_sf ("stop_name" = nms,
                "stop_id" = ids,
-               "earliest_arrival" = earliest_arrival,
+               "departure" = hms::hms (departure),
+               "arrival" = hms::hms (arrival),
+               "duration" = hms::hms (arrival - departure),
+               "transfers" = transfers,
                geometry = g)
 }
 
-route_midpoints <- function (x)
-{
+route_midpoints <- function (x) {
+
+    # NAs for trip IDs between transfer stations, which can be removed here
+    # anyway
+    x <- lapply (x, function (i) stats::na.omit (i))
+
     xy <- lapply (x, function (i)
-                  as.matrix (i [2:(nrow (i) - 1), c ("stop_lon", "stop_lat")]))
+                  as.matrix (i [-c (1, nrow (i)), c ("stop_lon", "stop_lat")]))
     xy <- do.call (rbind, xy)
     xy <- data.frame ("x" = xy [, 1], "y" = xy [, 2])
     g <- sf::st_as_sf (xy, coords = 1:2, crs = 4326)$geometry
     nms <- lapply (x, function (i)
-                  i [2:(nrow (i) - 1), "stop_name"])
+                  i [-c (1, nrow (i)), "stop_name"])
     ids <- lapply (x, function (i)
-                  i [2:(nrow (i) - 1), "stop_id"])
-    earliest_arrival <- lapply (x, function (i)
-        i [2:(nrow (i) - 1), "earliest_arrival"])
+                  i [-c (1, nrow (i)), "stop_id"])
+
+    arrival <- lapply (x, function (i) i$earliest_arrival [-c (1, nrow (i))])
+    arrival <- do.call (c, arrival)
+
+    departure <- lapply (x, function (i)
+                        rep (i$earliest_arrival [1], nrow (i) - 2))
+    departure <- do.call (c, departure)
+
+    duration <- hms::hms (as.integer (arrival) - as.integer (departure))
+
+    transfers <- do.call (c, lapply (x, function (i)
+                                     i$ntransfers [-c (1, nrow (i))]))
+
     sf::st_sf ("stop_name" = do.call (c, nms),
                "stop_id" = do.call (c, ids),
-               "earliest_arrival" = do.call (c, earliest_arrival),
+               "departure" = departure,
+               "arrival" = arrival,
+               "duration" = duration,
+               "transfers" = transfers,
                geometry = g)
 }
 
 # x is isolines
-isohull <- function (x, hull_alpha)
-{
+isohull <- function (x, hull_alpha) {
+
     xy <- lapply (x, function (i)
                   as.matrix (i [, c ("stop_lon", "stop_lat")]))
     xy <- do.call (rbind, xy)
@@ -239,8 +286,8 @@ isohull <- function (x, hull_alpha)
 }
 
 # ratio of lengths of minor / major axes of the hull
-hull_ratio <- function (x)
-{
+hull_ratio <- function (x) {
+
     xy <- sf::st_coordinates (x)
     d <- geodist::geodist (xy)
     d [lower.tri (d)] <- 0
@@ -256,9 +303,9 @@ hull_ratio <- function (x)
     minor_axis_dist / max (d)
 }
 
-get_ahull <- function (x, alpha = alpha)
-{
-    x <- x [!duplicated (x), ]
+get_ahull <- function (x, alpha = alpha) {
+
+    x <- stats::na.omit (x [!duplicated (x), ])
     alpha <- 0.1
     a <- data.frame (alphahull::ashape (x, alpha = alpha)$edges)
 
@@ -271,14 +318,11 @@ get_ahull <- function (x, alpha = alpha)
     # TODO: Find a better way to do this!
     ind_seq <- as.numeric (inds [1, ])
     inds <- inds [-1, ]
-    while (nrow (inds) > 0)
-    {
+    while (nrow (inds) > 0) {
         j <- which (inds$ind1 == utils::tail (ind_seq, n = 1))
-        if (length (j) > 0)
-        {
+        if (length (j) > 0) {
             ind_seq <- c (ind_seq, inds [j, 2])
-        } else
-        {
+        } else {
             j <- which (inds$ind2 == utils::tail (ind_seq, n = 1))
             ind_seq <- c (ind_seq, inds [j, 1])
         }
