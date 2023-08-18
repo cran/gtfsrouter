@@ -9,7 +9,8 @@ gtfs_transfer_table(
   d_limit = 200,
   min_transfer_time = 120,
   network = NULL,
-  network_times = FALSE
+  network_times = FALSE,
+  quiet = FALSE
 )
 }
 \arguments{
@@ -26,7 +27,10 @@ encompassed by the GTFS feed (see Examples).}
 
 \item{network_times}{If \code{TRUE}, transfer times are calculated by routing
 throughout the underlying street network. If this is not provided as the
-\code{net} parameter, it will be automatically downloaded.}
+\code{net} parameter, it will be automatically downloaded. If a network, is
+provided, this parameter is automatically set to \code{TRUE}.}
+
+\item{quiet}{Set to \code{TRUE} to suppress screen messages}
 }
 \value{
 Modified version of the \code{gtfs} input with additional transfers table.
@@ -35,10 +39,18 @@ Modified version of the \code{gtfs} input with additional transfers table.
 Construct a transfer table for a GTFS feed.
 }
 \examples{
-# Use the following lines to extract a street network for a given GTFS feed.
-# The result can then be passed as the `network` parameter.
-\dontrun{
-library (dodgr)
-net <- dodgr_streetnet_sc (pts = gtfs$stops [, c ("stop_lon", "stop_lat")])
+# Examples must be run on single thread only:
+data.table::setDTthreads (1)
+
+berlin_gtfs_to_zip ()
+f <- file.path (tempdir (), "vbb.zip")
+g <- extract_gtfs (f, quiet = TRUE)
+g <- gtfs_transfer_table (g, d_limit = 200)
+# g$transfers then has fewer rows than original, because original transfer
+# table contains duplicated rows.
 }
+\seealso{
+Other augment: 
+\code{\link{frequencies_to_stop_times}()}
 }
+\concept{augment}

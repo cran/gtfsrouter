@@ -48,18 +48,27 @@ rcpp_csa <- function(timetable, transfers, nstations, ntrips, start_stations, en
     .Call(`_gtfsrouter_rcpp_csa`, timetable, transfers, nstations, ntrips, start_stations, end_stations, start_time, max_transfers)
 }
 
-#' rcpp_isochrone
-#'
-#' Calculate isochrones using Connection Scan Algorithm for GTFS data. Works
-#' largely as rcpp_csa. Returns a list of integer vectors, with [i] holding
-#' sequences of stations on a given route, the end one being the terminal
-#' isochrone point, and [i+1] holding correpsonding trip numbers.
-#'
-#' All elements of all data are 1-indexed
+#' rcpp_freq_to_stop_times
 #'
 #' @noRd
-rcpp_isochrone <- function(timetable, transfers, nstations, start_stations, start_time, end_time, minimise_transfers) {
-    .Call(`_gtfsrouter_rcpp_isochrone`, timetable, transfers, nstations, start_stations, start_time, end_time, minimise_transfers)
+rcpp_freq_to_stop_times <- function(frequencies, stop_times, nrows, sfx) {
+    .Call(`_gtfsrouter_rcpp_freq_to_stop_times`, frequencies, stop_times, nrows, sfx)
+}
+
+#' Haversine for variable x and y
+#'
+#' @return single distance
+#'
+#' @note The sxd and syd values could be calculated in arrays, each value of
+#' which could be determined with only n operations, rather than the n2 used
+#' here. Doing so, however, requires very large C arrays which are often
+#' problematic, so this is safer.
+#'
+#' @noRd
+NULL
+
+rcpp_transfer_nbs <- function(stops, dlim) {
+    .Call(`_gtfsrouter_rcpp_transfer_nbs`, stops, dlim)
 }
 
 #' rcpp_traveltimes
@@ -75,3 +84,4 @@ rcpp_isochrone <- function(timetable, transfers, nstations, start_stations, star
 rcpp_traveltimes <- function(timetable, transfers, nstations, start_stations, start_time_min, start_time_max, minimise_transfers, max_traveltime) {
     .Call(`_gtfsrouter_rcpp_traveltimes`, timetable, transfers, nstations, start_stations, start_time_min, start_time_max, minimise_transfers, max_traveltime)
 }
+

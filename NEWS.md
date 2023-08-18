@@ -1,3 +1,22 @@
+# v 0.1.1
+
+Major changes:
+
+- Repository moved from "ATFutures/gtfs-router" to "UrbanAnalyst/gtfsrouter"
+- `gtfs_transfer_table()` function now much faster due to re-coding in C++
+- Removed previously deprecated `gtfs_isochrone()` function; now entirely
+  replaced by `gtfs_traveltimes()`.
+
+Minor changes:
+
+- `gtfs_timetable()` modified to work on feeds which do not have "calendar.txt"
+- Fix `transfer_times` function with updated dodgr `match_pts_to_verts` fn
+- Improve estimation of pedestrian transfer times
+- Fix transfer times when GTFS feed extends beyond bounds of provided network
+- Bug fix in `gtfs_route_headway()` function (#94; thanks to @zamirD123)
+- Bug fix in `gtfs_traveltimes()` to remove trips ending at start (#99; thanks to @viajerus)
+
+
 # v 0.0.5
 
 Major changes:

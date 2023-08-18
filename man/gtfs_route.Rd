@@ -65,8 +65,8 @@ multiple entries.}
 \item{max_transfers}{If not \code{NA}, specify a desired maximum number of
 transfers for the route (including but not exceeding this number). This
 parameter may be used to generate alternative routes with fewer transfers,
-although actual numbers of transfers may still exceed this number if a value
-is specified which exceeds the minimal feasible number of transfers.}
+although actual numbers of transfers may still exceed this number if the
+value specified is less than the minimal feasible number of transfers.}
 
 \item{from_to_are_ids}{Set to \code{TRUE} to enable \code{from} and \code{to} parameter to
 specify entries in \code{stop_id} rather than \code{stop_name} column of the \code{stops}
@@ -93,28 +93,54 @@ earliest departing service. Routes which depart at the earliest possible time
 can be calculated by setting \code{earliest_arrival = FALSE}.
 }
 \examples{
+# Examples must be run on single thread only:
+data.table::setDTthreads (1)
+
 berlin_gtfs_to_zip () # Write sample feed from Berlin, Germany to tempdir
 f <- file.path (tempdir (), "vbb.zip") # name of feed
 gtfs <- extract_gtfs (f)
 from <- "Innsbrucker Platz" # U-bahn station, not "S"
 to <- "Alexanderplatz"
 start_time <- 12 * 3600 + 120 # 12:02
+
 route <- gtfs_route (gtfs, from = from, to = to, start_time = start_time)
 
 # Specify day of week
-route <- gtfs_route (gtfs, from = from, to = to, start_time = start_time,
-                     day = "Sunday")
+route <- gtfs_route (
+    gtfs,
+    from = from,
+    to = to,
+    start_time = start_time,
+    day = "Sunday"
+)
 
 # specify travel by "U" = underground only
-route <- gtfs_route (gtfs, from = from, to = to, start_time = start_time,
-                     day = "Sunday", route_pattern = "^U")
+route <- gtfs_route (
+    gtfs,
+    from = from,
+    to = to,
+    start_time = start_time,
+    day = "Sunday",
+    route_pattern = "^U"
+)
 # specify travel by "S" = street-level only (not underground)
-route <- gtfs_route (gtfs, from = from, to = to, start_time = start_time,
-                     day = "Sunday", route_pattern = "^S")
+route <- gtfs_route (
+    gtfs,
+    from = from,
+    to = to,
+    start_time = start_time,
+    day = "Sunday",
+    route_pattern = "^S"
+)
 
 # Route queries are generally faster if the GTFS data are pre-processed with
 # `gtfs_timetable()`:
 gt <- gtfs_timetable (gtfs, day = "Sunday", route_pattern = "^S")
 route <- gtfs_route (gt, from = from, to = to, start_time = start_time)
-
 }
+\seealso{
+Other main: 
+\code{\link{gtfs_route_headway}()},
+\code{\link{gtfs_traveltimes}()}
+}
+\concept{main}

@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // rcpp_convert_time
 int rcpp_convert_time(const std::string& hms);
 RcppExport SEXP _gtfsrouter_rcpp_convert_time(SEXP hmsSEXP) {
@@ -58,20 +63,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_isochrone
-Rcpp::List rcpp_isochrone(Rcpp::DataFrame timetable, Rcpp::DataFrame transfers, const size_t nstations, const std::vector <size_t> start_stations, const int start_time, const int end_time, const bool minimise_transfers);
-RcppExport SEXP _gtfsrouter_rcpp_isochrone(SEXP timetableSEXP, SEXP transfersSEXP, SEXP nstationsSEXP, SEXP start_stationsSEXP, SEXP start_timeSEXP, SEXP end_timeSEXP, SEXP minimise_transfersSEXP) {
+// rcpp_freq_to_stop_times
+Rcpp::DataFrame rcpp_freq_to_stop_times(Rcpp::DataFrame frequencies, Rcpp::DataFrame stop_times, const size_t nrows, const std::string sfx);
+RcppExport SEXP _gtfsrouter_rcpp_freq_to_stop_times(SEXP frequenciesSEXP, SEXP stop_timesSEXP, SEXP nrowsSEXP, SEXP sfxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::DataFrame >::type timetable(timetableSEXP);
-    Rcpp::traits::input_parameter< Rcpp::DataFrame >::type transfers(transfersSEXP);
-    Rcpp::traits::input_parameter< const size_t >::type nstations(nstationsSEXP);
-    Rcpp::traits::input_parameter< const std::vector <size_t> >::type start_stations(start_stationsSEXP);
-    Rcpp::traits::input_parameter< const int >::type start_time(start_timeSEXP);
-    Rcpp::traits::input_parameter< const int >::type end_time(end_timeSEXP);
-    Rcpp::traits::input_parameter< const bool >::type minimise_transfers(minimise_transfersSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_isochrone(timetable, transfers, nstations, start_stations, start_time, end_time, minimise_transfers));
+    Rcpp::traits::input_parameter< Rcpp::DataFrame >::type frequencies(frequenciesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::DataFrame >::type stop_times(stop_timesSEXP);
+    Rcpp::traits::input_parameter< const size_t >::type nrows(nrowsSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type sfx(sfxSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_freq_to_stop_times(frequencies, stop_times, nrows, sfx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_transfer_nbs
+Rcpp::List rcpp_transfer_nbs(Rcpp::DataFrame stops, const double dlim);
+RcppExport SEXP _gtfsrouter_rcpp_transfer_nbs(SEXP stopsSEXP, SEXP dlimSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::DataFrame >::type stops(stopsSEXP);
+    Rcpp::traits::input_parameter< const double >::type dlim(dlimSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_transfer_nbs(stops, dlim));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -99,7 +113,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_gtfsrouter_rcpp_time_to_seconds", (DL_FUNC) &_gtfsrouter_rcpp_time_to_seconds, 1},
     {"_gtfsrouter_rcpp_make_timetable", (DL_FUNC) &_gtfsrouter_rcpp_make_timetable, 3},
     {"_gtfsrouter_rcpp_csa", (DL_FUNC) &_gtfsrouter_rcpp_csa, 8},
-    {"_gtfsrouter_rcpp_isochrone", (DL_FUNC) &_gtfsrouter_rcpp_isochrone, 7},
+    {"_gtfsrouter_rcpp_freq_to_stop_times", (DL_FUNC) &_gtfsrouter_rcpp_freq_to_stop_times, 4},
+    {"_gtfsrouter_rcpp_transfer_nbs", (DL_FUNC) &_gtfsrouter_rcpp_transfer_nbs, 2},
     {"_gtfsrouter_rcpp_traveltimes", (DL_FUNC) &_gtfsrouter_rcpp_traveltimes, 8},
     {NULL, NULL, 0}
 };
