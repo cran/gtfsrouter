@@ -61,6 +61,12 @@ seconds (with default of 1 hour). See note for details.}
 \item{quiet}{Set to \code{TRUE} to suppress screen messages (currently just
 regarding timetable construction).}
 }
+\value{
+A \code{data.frame} of travel times and required numbers of transfers to
+all stations reachable from the given \code{from} station. Additional columns
+include "start_time"  of connection, and information on destination stops
+including "id" numbers, names, and geographical coordinates.
+}
 \description{
 Travel times from a nominated station departing at a nominated time to every
 other reachable station in a system.
@@ -74,7 +80,7 @@ to reach all or most stations desired for a particular query, rather than set
 }
 \examples{
 # Examples must be run on single thread only:
-data.table::setDTthreads (1)
+nthr <- data.table::setDTthreads (1)
 
 berlin_gtfs_to_zip ()
 f <- file.path (tempdir (), "vbb.zip")
@@ -83,6 +89,8 @@ g <- gtfs_timetable (g)
 from <- "Alexanderplatz"
 start_times <- 12 * 3600 + c (0, 60) * 60 # 8:00-9:00
 res <- gtfs_traveltimes (g, from, start_times)
+
+data.table::setDTthreads (nthr)
 }
 \seealso{
 Other main: 

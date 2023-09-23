@@ -1,6 +1,6 @@
 ## ----DTthread, echo = FALSE---------------------------------------------------
 # Necessary for CRAN to avoid CPU / elapsed time ratios being too high
-data.table::setDTthreads (1)
+nthr <- data.table::setDTthreads (1)
 
 ## ----berlin_gtfs--------------------------------------------------------------
 library (gtfsrouter)
@@ -26,7 +26,8 @@ nrow (tt)
 nrow (gtfs$stops)
 
 ## ----maxtt--------------------------------------------------------------------
-hms::hms (as.integer (max (tt$duration)))
+library (hms)
+hms (as.integer (max (tt$duration)))
 
 ## ----get-vbb, eval = FALSE----------------------------------------------------
 #  gtfs <- extract_gtfs ("/<path>/<to>/vbb.zip")
@@ -154,4 +155,7 @@ lines (dat$n_stns, dat$calc_time)
 ## ----ntr-prop, eval = FALSE---------------------------------------------------
 #  length (which (dat$min_tr_ntr == dat$fastest_ntr)) / nrow (dat)
 #  ## [1] 0.6875221
+
+## ----DTthread-reset, echo = FALSE---------------------------------------------
+data.table::setDTthreads (nthr)
 

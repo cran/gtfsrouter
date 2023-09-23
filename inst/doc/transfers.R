@@ -1,6 +1,6 @@
 ## ----DTthread, echo = FALSE---------------------------------------------------
 # Necessary for CRAN to avoid CPU / elapsed time ratios being too high
-data.table::setDTthreads (1)
+nthr <- data.table::setDTthreads (1)
 
 ## ----berlin_gtfs--------------------------------------------------------------
 library (gtfsrouter)
@@ -534,4 +534,7 @@ ggplot (d, aes (x = d_limit, y = change)) +
 ggplot (d, aes (x = d_limit, y = prop)) +
     geom_point (pch = 19, col = "orange") +
     geom_smooth (method = "loess", formula = "y ~ x")
+
+## ----DTthread-reset, echo = FALSE---------------------------------------------
+data.table::setDTthreads (nthr)
 

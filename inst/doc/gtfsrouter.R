@@ -3,7 +3,7 @@ library (gtfsrouter)
 
 ## ----DTthread, echo = FALSE---------------------------------------------------
 # Necessary for CRAN to avoid CPU / elapsed time ratios being too high
-data.table::setDTthreads (1)
+nthr <- data.table::setDTthreads (1)
 
 ## ----berlin_gtfs--------------------------------------------------------------
 berlin_gtfs_to_zip ()
@@ -158,6 +158,7 @@ diff_total <- paste0 (mm, "min, ", ss, "s")
 Sys.setenv ("gtfs_home" = "Innsbrucker Platz")
 Sys.setenv ("gtfs_work" = "Alexanderplatz")
 Sys.setenv ("gtfs_data" = file.path (tempdir (), "vbb.zip"))
+data.table::setDTthreads (1) # See ?setDTthreads: setenv resets it
 process_gtfs_local () # If not already done
 go_home (start_time = "12:20") # next available service
 
@@ -174,4 +175,7 @@ go_home (start_time = "12:20") # next available service
 
 ## ----home-work2, echo = FALSE-------------------------------------------------
 go_home (start_time = "12:20", wait = 1)
+
+## ----DTthread-reset, echo = FALSE---------------------------------------------
+data.table::setDTthreads (nthr)
 

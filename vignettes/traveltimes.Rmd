@@ -16,7 +16,7 @@ vignette: >
   
 ```{r DTthread, echo = FALSE}
 # Necessary for CRAN to avoid CPU / elapsed time ratios being too high
-data.table::setDTthreads (1)
+nthr <- data.table::setDTthreads (1)
 ```
 
 `gtfsrouter` includes a function,
@@ -97,7 +97,8 @@ is 3600, or one hour. For the token feed used here, the maximum travel times
 returned are:
 
 ```{r maxtt}
-hms::hms (as.integer (max (tt$duration)))
+library (hms)
+hms (as.integer (max (tt$duration)))
 ```
 
 In this case that value actually reflects the restricted data included in the
@@ -309,3 +310,7 @@ The
 [`gtfs_traveltimes()`](https://UrbanAnalyst.github.io/gtfsrouter/reference/gtfs_traveltimes.html),
 is based on a new algorithm specifically developed for this package, and which
 will be described here in further detail in subsequent releases of the package.
+
+```{r DTthread-reset, echo = FALSE}
+data.table::setDTthreads (nthr)
+```

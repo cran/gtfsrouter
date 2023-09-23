@@ -19,6 +19,10 @@
 #' @param max_traveltime The maximal traveltime to search for, specified in
 #' seconds (with default of 1 hour). See note for details.
 #' @inheritParams gtfs_route
+#' @return A `data.frame` of travel times and required numbers of transfers to
+#' all stations reachable from the given `from` station. Additional columns
+#' include "start_time"  of connection, and information on destination stops
+#' including "id" numbers, names, and geographical coordinates.
 #'
 #' @note Higher values of `max_traveltime` will return traveltimes for greater
 #' numbers of stations, but may lead to considerably longer calculation times.
@@ -28,7 +32,7 @@
 #'
 #' @examples
 #' # Examples must be run on single thread only:
-#' data.table::setDTthreads (1)
+#' nthr <- data.table::setDTthreads (1)
 #'
 #' berlin_gtfs_to_zip ()
 #' f <- file.path (tempdir (), "vbb.zip")
@@ -37,6 +41,8 @@
 #' from <- "Alexanderplatz"
 #' start_times <- 12 * 3600 + c (0, 60) * 60 # 8:00-9:00
 #' res <- gtfs_traveltimes (g, from, start_times)
+#'
+#' data.table::setDTthreads (nthr)
 #' @family main
 #' @export
 gtfs_traveltimes <- function (gtfs,

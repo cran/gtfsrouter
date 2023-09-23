@@ -11,7 +11,7 @@
 
 <meta name="author" content="Mark Padgham &amp; Alexandra Kapp" />
 
-<meta name="date" content="2023-08-16" />
+<meta name="date" content="2023-09-22" />
 
 <title>Travel Times</title>
 
@@ -1499,7 +1499,7 @@ border-radius: 0px;
 
 <h1 class="title toc-ignore">Travel Times</h1>
 <h4 class="author">Mark Padgham &amp; Alexandra Kapp</h4>
-<h4 class="date">2023-08-16</h4>
+<h4 class="date">2023-09-22</h4>
 
 </div>
 
@@ -1522,7 +1522,7 @@ step, achieved by calling the <a href="https://UrbanAnalyst.github.io/gtfsrouter
 function</a>, is necessary prior to calculating travel times.</p>
 <pre class="r"><code>library (gtfsrouter)
 berlin_gtfs_to_zip ()</code></pre>
-<pre><code>## [1] &quot;/tmp/Rtmpuru0vR/vbb.zip&quot;</code></pre>
+<pre><code>## [1] &quot;/tmp/Rtmpdwaq8v/vbb.zip&quot;</code></pre>
 <pre class="r"><code>f &lt;- file.path (tempdir (), &quot;vbb.zip&quot;)
 gtfs &lt;- extract_gtfs (f, quiet = TRUE)
 gtfs &lt;- gtfs_timetable (gtfs, day = 3)</code></pre>
@@ -1578,8 +1578,9 @@ function has an additional parameter, <code>max_traveltime</code>, and
 only returns travel times to stations able to be reached within this
 upper limit. The default value is 3600, or one hour. For the token feed
 used here, the maximum travel times returned are:</p>
-<pre class="r"><code>hms::hms (as.integer (max (tt$duration)))</code></pre>
-<pre><code>## Warning in hms::hms(as.integer(max(tt$duration))): NAs introduced by coercion</code></pre>
+<pre class="r"><code>library (hms)
+hms (as.integer (max (tt$duration)))</code></pre>
+<pre><code>## Warning in hms(as.integer(max(tt$duration))): NAs introduced by coercion</code></pre>
 <pre><code>## NA</code></pre>
 <p>In this case that value actually reflects the restricted data
 included in the sample data set, but applying the function to an actual
