@@ -39,7 +39,7 @@ library (gtfsrouter)
 packageVersion ("gtfsrouter")
 ```
 
-    ## [1] '0.0.5.158'
+    ## [1] '0.1.2.7'
 
 ## Main functions
 
@@ -54,7 +54,7 @@ filename <- berlin_gtfs_to_zip ()
 print (filename)
 ```
 
-    ## [1] "/tmp/RtmpeXCbTq/vbb.zip"
+    ## [1] "/tmp/Rtmp420siD/vbb.zip"
 
 For normal package use, `filename` will specify the name of a local GTFS
 `.zip` file.
@@ -164,17 +164,18 @@ entries, to enable the feed to be used for routing.
 
 ## Contributors
 
-
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
 
-All contributions to this project are gratefully acknowledged using the [`allcontributors` package](https://github.com/ropenscilabs/allcontributors) following the [all-contributors](https://allcontributors.org) specification. Contributions of any kind are welcome!
+All contributions to this project are gratefully acknowledged using the
+[`allcontributors` package](https://github.com/ropensci/allcontributors)
+following the [all-contributors](https://allcontributors.org)
+specification. Contributions of any kind are welcome!
 
 ### Code
 
 <table>
-
 <tr>
 <td align="center">
 <a href="https://github.com/mpadge">
@@ -207,14 +208,11 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 <a href="https://github.com/UrbanAnalyst/gtfsrouter/commits?author=polettif">polettif</a>
 </td>
 </tr>
-
 </table>
-
 
 ### Issue Authors
 
 <table>
-
 <tr>
 <td align="center">
 <a href="https://github.com/sridharraman">
@@ -259,8 +257,6 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 <a href="https://github.com/UrbanAnalyst/gtfsrouter/issues?q=is%3Aissue+author%3Adcooley">dcooley</a>
 </td>
 </tr>
-
-
 <tr>
 <td align="center">
 <a href="https://github.com/bernd886">
@@ -305,12 +301,10 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 <a href="https://github.com/UrbanAnalyst/gtfsrouter/issues?q=is%3Aissue+author%3AzamirD123">zamirD123</a>
 </td>
 </tr>
-
-
 <tr>
 <td align="center">
 <a href="https://github.com/viajerus">
-<img src="https://avatars.githubusercontent.com/u/63015973?v=4" width="100px;" alt=""/>
+<img src="https://avatars.githubusercontent.com/u/63015973?u=e85734d18801b607316ea25b24624da6762862c3&v=4" width="100px;" alt=""/>
 </a><br>
 <a href="https://github.com/UrbanAnalyst/gtfsrouter/issues?q=is%3Aissue+author%3Aviajerus">viajerus</a>
 </td>
@@ -332,15 +326,18 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 </a><br>
 <a href="https://github.com/UrbanAnalyst/gtfsrouter/issues?q=is%3Aissue+author%3Apteridin">pteridin</a>
 </td>
+<td align="center">
+<a href="https://github.com/FlxPo">
+<img src="https://avatars.githubusercontent.com/u/5145583?u=cbd02ee0a0fa0447429f38bd7e3a1da57c841239&v=4" width="100px;" alt=""/>
+</a><br>
+<a href="https://github.com/UrbanAnalyst/gtfsrouter/issues?q=is%3Aissue+author%3AFlxPo">FlxPo</a>
+</td>
 </tr>
-
 </table>
-
 
 ### Issue Contributors
 
 <table>
-
 <tr>
 <td align="center">
 <a href="https://github.com/tbuckl">
@@ -379,9 +376,7 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 <a href="https://github.com/UrbanAnalyst/gtfsrouter/issues?q=is%3Aissue+commenter%3Ahansmib">hansmib</a>
 </td>
 </tr>
-
 </table>
-
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->

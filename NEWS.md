@@ -1,3 +1,11 @@
+# v0.1.2.00x - current dev
+
+## Minor changes:
+
+- Fix bug with return values of traveltimes (#116; thanks to @FlxPo)
+- Use 'fs' package for all file path manipulations.
+
+---
 
 # v 0.1.2
 

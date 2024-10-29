@@ -11,7 +11,7 @@
 
 <meta name="author" content="Mark Padgham" />
 
-<meta name="date" content="2023-09-22" />
+<meta name="date" content="2024-10-28" />
 
 <title>gtfsrouter</title>
 
@@ -1499,7 +1499,7 @@ border-radius: 0px;
 
 <h1 class="title toc-ignore">gtfsrouter</h1>
 <h4 class="author">Mark Padgham</h4>
-<h4 class="date">2023-09-22</h4>
+<h4 class="date">2024-10-28</h4>
 
 </div>
 
@@ -1544,19 +1544,15 @@ to a locally-stored <code>.zip</code> archive in the
 <code>tempdir()</code> of the current <strong>R</strong> session. These
 data can be exported and re-imported with:</p>
 <pre class="r"><code>berlin_gtfs_to_zip ()</code></pre>
-<pre><code>## [1] &quot;/tmp/Rtmpdwaq8v/vbb.zip&quot;</code></pre>
+<pre><code>## /tmp/RtmpEcVVkv/vbb.zip</code></pre>
 <pre class="r"><code>f &lt;- file.path (tempdir (), &quot;vbb.zip&quot;)
 file.exists (f)</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 <pre class="r"><code>gtfs &lt;- extract_gtfs (f)</code></pre>
-<pre><code>## ▶ Unzipping GTFS archive
-✔ Unzipped GTFS archive  
-## ▶ Extracting GTFS feed
-✔ Extracted GTFS feed 
-## ▶ Converting stop times to seconds
-✔ Converted stop times to seconds 
-## ▶ Converting transfer times to seconds
-✔ Converted transfer times to seconds</code></pre>
+<pre><code>## ▶ Unzipping GTFS archive✔ Unzipped GTFS archive  
+## ▶ Extracting GTFS feed✔ Extracted GTFS feed 
+## ▶ Converting stop times to seconds✔ Converted stop times to seconds 
+## ▶ Converting transfer times to seconds✔ Converted transfer times to seconds</code></pre>
 <p>That simply re-creates the original package data,
 <code>berlin_gtfs</code> (although the extracted data differ through
 having a couple of additional attributes defining it as a
@@ -1576,7 +1572,7 @@ gtfs_route (
     from = from,
     to = to
 )</code></pre>
-<pre><code>## Day not specified; extracting timetable for friday</code></pre>
+<pre><code>## Day not specified; extracting timetable for monday</code></pre>
 <table>
 <colgroup>
 <col width="11%" />
@@ -1745,14 +1741,10 @@ implemented with <code>gtfs_timetable()</code> prior to calling
 <code>gtfs_route()</code>. This is easy to demonstrate using the sample
 data:</p>
 <pre class="r"><code>gtfs &lt;- extract_gtfs (f)</code></pre>
-<pre><code>## ▶ Unzipping GTFS archive
-✔ Unzipped GTFS archive  
-## ▶ Extracting GTFS feed
-✔ Extracted GTFS feed 
-## ▶ Converting stop times to seconds
-✔ Converted stop times to seconds 
-## ▶ Converting transfer times to seconds
-✔ Converted transfer times to seconds</code></pre>
+<pre><code>## ▶ Unzipping GTFS archive✔ Unzipped GTFS archive  
+## ▶ Extracting GTFS feed✔ Extracted GTFS feed 
+## ▶ Converting stop times to seconds✔ Converted stop times to seconds 
+## ▶ Converting transfer times to seconds✔ Converted transfer times to seconds</code></pre>
 <pre class="r"><code>from &lt;- &quot;Innsbrucker Platz&quot;
 to &lt;- &quot;Alexanderplatz&quot;
 system.time (
@@ -1765,7 +1757,7 @@ system.time (
     )
 )</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.055   0.000   0.055</code></pre>
+##   0.051   0.000   0.052</code></pre>
 <pre class="r"><code>names (gtfs)</code></pre>
 <pre><code>## [1] &quot;calendar&quot;   &quot;routes&quot;     &quot;trips&quot;      &quot;stop_times&quot; &quot;stops&quot;     
 ## [6] &quot;transfers&quot;</code></pre>
@@ -1783,7 +1775,7 @@ names (gtfs)</code></pre>
     start_time = &quot;12:00:00&quot;
 ))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.043   0.000   0.044</code></pre>
+##   0.041   0.000   0.041</code></pre>
 <p>Note that the <code>day</code> parameter is used to extract the
 timetable, after which it is no longer required in the actual call to
 <code>gtfs_route()</code>.</p>

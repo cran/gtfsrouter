@@ -162,12 +162,12 @@ data.table::setDTthreads (1) # See ?setDTthreads: setenv resets it
 process_gtfs_local () # If not already done
 go_home (start_time = "12:20") # next available service
 
-## ---- home-work-setup2, eval = FALSE------------------------------------------
+## ----home-work-setup2, eval = FALSE-------------------------------------------
 #  Sys.setenv ("gtfs_home" = "<my home station>")
 #  Sys.setenv ("gtfs_work" = "<my work station>")
 #  Sys.setenv ("gtfs_data" = "/full/path/to/gtfs.zip")
 
-## ---- home-work-setup3, eval = FALSE------------------------------------------
+## ----home-work-setup3, eval = FALSE-------------------------------------------
 #  process_gtfs_local ()
 
 ## ----home-work-fakey2, eval = FALSE-------------------------------------------
