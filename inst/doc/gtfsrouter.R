@@ -12,13 +12,13 @@ file.exists (f)
 gtfs <- extract_gtfs (f)
 
 ## ----route1-fakey, eval = FALSE-----------------------------------------------
-#  from <- "Innsbrucker Platz"
-#  to <- "Alexanderplatz"
-#  gtfs_route (
-#      gtfs,
-#      from = from,
-#      to = to
-#  )
+# from <- "Innsbrucker Platz"
+# to <- "Alexanderplatz"
+# gtfs_route (
+#     gtfs,
+#     from = from,
+#     to = to
+# )
 
 ## ----route1, eval = TRUE, echo = FALSE----------------------------------------
 from <- "Innsbrucker Platz"
@@ -66,20 +66,20 @@ system.time (gtfs_route (
 ))
 
 ## ----gtfs_route_table-fakey, eval = FALSE-------------------------------------
-#  head (gtfs$route)
+# head (gtfs$route)
 
 ## ----gtfs_route_table, echo = FALSE-------------------------------------------
 knitr::kable (head (gtfs$route))
 
 ## ----route3-fakey, eval = FALSE-----------------------------------------------
-#  gtfs_route (
-#      gtfs,
-#      from = from,
-#      to = to,
-#      start_time = "12:00:00",
-#      day = "Sunday",
-#      route_pattern = "^S"
-#  )
+# gtfs_route (
+#     gtfs,
+#     from = from,
+#     to = to,
+#     start_time = "12:00:00",
+#     day = "Sunday",
+#     route_pattern = "^S"
+# )
 
 ## ----route3, echo = FALSE, eval = TRUE----------------------------------------
 knitr::kable (gtfs_route (
@@ -92,16 +92,16 @@ knitr::kable (gtfs_route (
 ))
 
 ## ----route4a-fakey, eval = FALSE----------------------------------------------
-#  from <- "Alexanderplatz"
-#  to <- "Pankow"
-#  gtfs_route (
-#      gtfs,
-#      from = from,
-#      to = to,
-#      start_time = "12:00:00",
-#      day = "Sunday",
-#      earliest_arrival = FALSE
-#  )
+# from <- "Alexanderplatz"
+# to <- "Pankow"
+# gtfs_route (
+#     gtfs,
+#     from = from,
+#     to = to,
+#     start_time = "12:00:00",
+#     day = "Sunday",
+#     earliest_arrival = FALSE
+# )
 
 ## ----route4a, eval = TRUE, echo = FALSE---------------------------------------
 from <- "Alexanderplatz"
@@ -124,14 +124,14 @@ r2 <- gtfs_route (
 knitr::kable (r2)
 
 ## ----route4b-fakey, eval = FALSE----------------------------------------------
-#  gtfs_route (
-#      gtfs,
-#      from = from,
-#      to = to,
-#      start_time = "12:00:00",
-#      day = "Sunday",
-#      earliest_arrival = TRUE
-#  )
+# gtfs_route (
+#     gtfs,
+#     from = from,
+#     to = to,
+#     start_time = "12:00:00",
+#     day = "Sunday",
+#     earliest_arrival = TRUE
+# )
 
 ## ----route4b, eval = TRUE, echo = FALSE---------------------------------------
 knitr::kable (r1)
@@ -152,7 +152,7 @@ ss <- diff_total - mm * 60
 diff_total <- paste0 (mm, "min, ", ss, "s")
 
 ## ----home-work-fakey1, eval = FALSE-------------------------------------------
-#  go_home ()
+# go_home ()
 
 ## ----home-work-setup, echo = FALSE--------------------------------------------
 Sys.setenv ("gtfs_home" = "Innsbrucker Platz")
@@ -163,15 +163,15 @@ process_gtfs_local () # If not already done
 go_home (start_time = "12:20") # next available service
 
 ## ----home-work-setup2, eval = FALSE-------------------------------------------
-#  Sys.setenv ("gtfs_home" = "<my home station>")
-#  Sys.setenv ("gtfs_work" = "<my work station>")
-#  Sys.setenv ("gtfs_data" = "/full/path/to/gtfs.zip")
+# Sys.setenv ("gtfs_home" = "<my home station>")
+# Sys.setenv ("gtfs_work" = "<my work station>")
+# Sys.setenv ("gtfs_data" = "/full/path/to/gtfs.zip")
 
 ## ----home-work-setup3, eval = FALSE-------------------------------------------
-#  process_gtfs_local ()
+# process_gtfs_local ()
 
 ## ----home-work-fakey2, eval = FALSE-------------------------------------------
-#  go_home (wait = 1)
+# go_home (wait = 1)
 
 ## ----home-work2, echo = FALSE-------------------------------------------------
 go_home (start_time = "12:20", wait = 1)
